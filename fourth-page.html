@@ -1,0 +1,387 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        h1, h2, h3 {
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+        input, button {
+            padding: 8px;
+            margin: 5px;
+            width: 180px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .center {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Patient Information</h1>
+    <div id="patientInfo"></div>
+   
+    <h3>Medication List</h3>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Date of Purchasing</th>
+                <th>Drug</th>
+                <th>Days</th>
+            </tr>
+        </thead>
+        <tbody id="medicationList"></tbody>
+    </table>
+
+    <div class="center">
+        <h3>Add Medication</h3>
+        <label>Date of Purchasing:</label> 
+        <input type="date" id="medDate">
+        
+        <label>Drug:</label>
+        <input type="text" id="medDrug" placeholder="Enter drug name">
+        
+        <label>Days:</label>
+        <input type="number" id="medDays" placeholder="Enter number of days" min="1">
+        
+        <button onclick="addMedication()">Add Medication</button>
+    </div>
+    
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const firebaseConfig = {
+        apiKey: "AIzaSyAy305t9V80YKs28gZmSi6cjlSdxHyUXaE",
+         authDomain: "settle-safe.firebaseapp.com",
+        projectId: "settle-safe",
+        storageBucket: "settle-safe.firebasestorage.app",
+        messagingSenderId: "527658353707",
+        appId: "1:527658353707:web:f5c72b60af87ed0cce566e",
+        measurementId: "G-V9RZ7YL7LC"
+    };
+
+        
+    firebase.initializeApp(firebaseConfig);
+            const db = firebase.firestore();
+
+            function addMedication() {
+                const currentPatient = JSON.parse(localStorage.getItem("currentPatient"));
+                if (!currentPatient) {
+                    alert("No patient logged in. Please log in first.");
+                    return;
+                }
+
+                const medDate = document.getElementById("medDate").value;
+                const medDrug = document.getElementById("medDrug").value.trim();
+                const medDays = document.getElementById("medDays").value;
+
+                if (!medDate || !medDrug || !medDays) {
+                    alert("Please fill out all fields.");
+                    return;
+                }
+
+                const medication = {
+                    date: medDate,
+                    drug: medDrug,
+                    days: parseInt(medDays),
+                    patientId: currentPatient.id
+                };
+
+                db.collection("medications").add(medication)
+                    .then(() => {
+                        alert("Medication added successfully.");
+                        document.getElementById("medDate").value = "";
+                        document.getElementById("medDrug").value = "";
+                        document.getElementById("medDays").value = "";
+                    })
+                    .catch(error => {
+                        console.error("Error adding medication: ", error);
+                    });
+            }
+
+            function displayMedications() {
+                const currentPatient = JSON.parse(localStorage.getItem("currentPatient"));
+                if (!currentPatient) {
+                    return;
+                }
+
+                const medicationList = document.getElementById("medicationList");
+
+                db.collection("medications").where("patientId", "==", currentPatient.id)
+                    .onSnapshot(snapshot => {
+                        medicationList.innerHTML = ""; // Clear existing content
+
+                        if (snapshot.empty) {
+                            medicationList.innerHTML = "<tr><td colspan='3'>No medications found.</td></tr>";
+                            return;
+                        }
+
+                        snapshot.forEach(doc => {
+                            const med = doc.data();
+                            medicationList.innerHTML += `
+                                <tr>
+                                    <td>${med.date}</td>
+                                    <td>${med.drug}</td>
+                                    <td>${med.days}</td>
+                                </tr>`;
+                        });
+                    }, error => {
+                        console.error("Error fetching medications: ", error);
+                    });
+            }
+
+            // Load medications when the page is ready
+            displayMedications();
+        });
+    </script>
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        h1, h2, h3 {
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+        input, button {
+            padding: 8px;
+            margin: 5px;
+            width: 180px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .center {
+            text-align: center;
+        }
+        .delete-btn {
+            background-color: #e74c3c;
+            color: white;
+            padding: 6px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .delete-btn:hover {
+            background-color: #c0392b;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Patient Information</h1>
+    <div id="patientInfo"></div>
+
+    <h3>Medication List</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Date of Purchasing</th>
+                <th>Drug</th>
+                <th>Days</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="medicationList"></tbody>
+    </table>
+
+    <div class="center">
+        <h3>Add Medication</h3>
+        <label>Date of Purchasing:</label> 
+        <input type="date" id="medDate">
+        
+        <label>Drug:</label>
+        <input type="text" id="medDrug" placeholder="Enter drug name">
+        
+        <label>Days:</label>
+        <input type="number" id="medDays" placeholder="Enter number of days" min="1">
+        
+        <button onclick="addMedication()">Add Medication</button>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+         apiKey: "AIzaSyAy305t9V80YKs28gZmSi6cjlSdxHyUXaE",
+         authDomain: "settle-safe.firebaseapp.com",
+        projectId: "settle-safe",
+        storageBucket: "settle-safe.firebasestorage.app",
+        messagingSenderId: "527658353707",
+        appId: "1:527658353707:web:f5c72b60af87ed0cce566e",
+        measurementId: "G-V9RZ7YL7LC"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Load patient info
+        function loadPatientInfo() {
+            const currentPatient = JSON.parse(localStorage.getItem("currentPatient"));
+            if (!currentPatient) {
+                document.getElementById("patientInfo").innerHTML = "<p style='text-align:center;color:red;'>No patient logged in.</p>";
+                return;
+            }
+            document.getElementById("patientInfo").innerHTML = `<h3>Patient ID: ${currentPatient.id}</h3><h3>Name: ${currentPatient.name}</h3>`;
+        }
+
+        // Add medication
+        function addMedication() {
+            const currentPatient = JSON.parse(localStorage.getItem("currentPatient"));
+            if (!currentPatient) {
+                alert("No patient logged in. Please log in first.");
+                return;
+            }
+
+            const medDate = document.getElementById("medDate").value;
+            const medDrug = document.getElementById("medDrug").value.trim();
+            const medDays = document.getElementById("medDays").value;
+
+            if (!medDate || !medDrug || !medDays) {
+                alert("Please fill out all fields.");
+                return;
+            }
+
+            const medication = {
+                date: medDate,
+                drug: medDrug,
+                days: parseInt(medDays),
+                patientId: currentPatient.id
+            };
+
+            db.collection("medications").add(medication)
+                .then(() => {
+                    alert("Medication added successfully.");
+                    document.getElementById("medDate").value = "";
+                    document.getElementById("medDrug").value = "";
+                    document.getElementById("medDays").value = "";
+                    displayMedications(); // Refresh list after adding
+                })
+                .catch(error => {
+                    console.error("Error adding medication: ", error);
+                    alert("Error adding medication: " + error.message);
+                });
+        }
+
+        // Display medications
+        function displayMedications() {
+            const currentPatient = JSON.parse(localStorage.getItem("currentPatient"));
+            if (!currentPatient) return;
+
+            const medicationList = document.getElementById("medicationList");
+
+            db.collection("medications").where("patientId", "==", currentPatient.id)
+                .onSnapshot(snapshot => {
+                    medicationList.innerHTML = ""; 
+
+                    if (snapshot.empty) {
+                        medicationList.innerHTML = "<tr><td colspan='4'>No medications found. Please add one.</td></tr>";
+                        return;
+                    }
+
+                    snapshot.forEach(doc => {
+                        const med = doc.data();
+                        const row = document.createElement("tr");
+                        row.innerHTML = `
+                            <td>${med.date}</td>
+                            <td>${med.drug}</td>
+                            <td>${med.days}</td>
+                            <td><button onclick="deleteMedication('${doc.id}')">Delete</button></td>
+                        `;
+                        medicationList.appendChild(row);
+                    });
+                }, error => {
+                    console.error("Error fetching medications: ", error);
+                });
+        }
+
+        // Delete medication
+        function deleteMedication(medId) {
+            if (confirm("Are you sure you want to delete this medication?")) {
+                db.collection("medications").doc(medId).delete()
+                    .then(() => {
+                        alert("Medication deleted successfully.");
+                        displayMedications(); // Refresh list after deleting
+                    })
+                    .catch(error => {
+                        console.error("Error deleting medication: ", error);
+                    });
+            }
+        }
+
+        window.addMedication = addMedication;
+        window.deleteMedication = deleteMedication;
+    </script>
+</body>
+</html>

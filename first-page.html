@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-image: url("1.jpg"); /* Background image file */
+            background-size: cover; /* Ensures the image covers the full screen */
+            background-position: -20px center; /* Move the background image slightly to the left */
+        }
+        .password-container {
+            text-align: center;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.8); /* Transparent background for contrast */
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-left: 20px; /* Move the whole form slightly to the right */
+        }
+        input[type="password"] {
+            padding: 10px;
+            font-size: 16px;
+            margin: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="password-container">
+        <h2>Enter Password to Continue</h2>
+        <input type="password" id="password" placeholder="Password" required>
+        <br>
+        <button onclick="checkPassword()">Submit</button>
+    </div>
+
+    <script>
+        function checkPassword() {
+            const password = document.getElementById("password").value;
+            if (password === "12345") {  // Correct password
+                window.location.href = "second-page.html";  // Redirect to another page if password is correct
+            } else {
+                alert("Incorrect password!");
+            }
+        }
+    </script>
+</body>
+</html>

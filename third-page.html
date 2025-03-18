@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .form-container {
+            text-align: center;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        input[type="text"], input[type="password"], input[type="date"], select {
+            padding: 10px;
+            font-size: 16px;
+            width: 200px;
+            margin: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin-top: 10px;
+            border-radius: 5px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .hidden { display: none; }
+        .error { color: red; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+        <!-- Signup Form -->
+        <h2>Sign Up</h2>
+        <form id="signupForm">
+            <input type="text" id="newPatientId" placeholder="Patient ID" required>
+            <input type="text" id="newPatientName" placeholder="Full Name" required>
+            <input type="date" id="newPatientDob" required>
+            <select id="newPatientSex">
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+            </select>
+            <input type="password" id="newPatientPassword" placeholder="Password" required>
+            <button type="submit" id="signupBtn">Sign Up</button>
+        </form>
+    
+        <!-- Login Form -->
+        <h2>Login</h2>
+        <form id="loginForm">
+            <input type="text" id="patientId" placeholder="Patient ID" required>
+            <input type="password" id="patientPassword" placeholder="Password" required>
+            <button type="submit" id="loginBtn">Login</button>
+        </form>
+        <p id="loginError" class="hidden" style="color: red;"></p>
+
+         <!-- Admin Button -->
+         <button onclick="openAdminPanel()">Admin Panel</button>
+        </div>
+    
+        <!-- Firebase SDK -->
+        <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    
+        <script>
+            // Firebase Configuration
+            const firebaseConfig = {
+         apiKey: "AIzaSyAy305t9V80YKs28gZmSi6cjlSdxHyUXaE",
+         authDomain: "settle-safe.firebaseapp.com",
+        projectId: "settle-safe",
+        storageBucket: "settle-safe.firebasestorage.app",
+        messagingSenderId: "527658353707",
+        appId: "1:527658353707:web:f5c72b60af87ed0cce566e",
+        measurementId: "G-V9RZ7YL7LC"
+};
+    
+            // Initialize Firebase
+            firebase.initializeApp(firebaseConfig);
+            const auth = firebase.auth();
+            const db = firebase.firestore();
+
+              // Admin Panel Access
+    function openAdminPanel() {
+    const adminPassword = prompt("Enter Admin Password:");
+    if (adminPassword === "admin123") {
+        window.location.href = "fifth-page.html";
+    } else {
+        alert("Incorrect password. Access denied!");
+    }
+}
+    
+            // Function to sign up a user
+            function signupUser(event) {
+  event.preventDefault();
+
+  const newPatientId = document.getElementById("newPatientId").value.trim();
+  const newPatientName = document.getElementById("newPatientName").value.trim();
+  const newPatientDob = document.getElementById("newPatientDob").value;
+  const newPatientSex = document.getElementById("newPatientSex").value;
+  const newPatientPassword = document.getElementById("newPatientPassword").value.trim();
+
+  if (!newPatientId || !newPatientName || !newPatientDob || !newPatientSex || !newPatientPassword) {
+    alert("Please fill in all fields.");
+    return;
+  }
+
+  auth.createUserWithEmailAndPassword(newPatientId + "@example.com", newPatientPassword)
+    .then((userCredential) => {
+      const user = userCredential.user;
+      console.log("User created:", user.uid);
+
+      return db.collection("users").doc(user.uid).set({
+        id: newPatientId,
+        name: newPatientName,
+        dob: newPatientDob,
+        sex: newPatientSex,
+        role: "user"
+      });
+    })
+    .then(() => {
+      alert("Sign-up successful!");
+      window.location.href = "fourth-page.html";
+    })
+    .catch(error => {
+      console.error("Sign-up Error:", error.message);
+      alert(error.message);
+    });
+}
+
+    
+            // Function to log in a user (Firestore check before authentication)
+            function loginUser(event) {
+  event.preventDefault(); // Prevent page refresh
+
+  const patientId = document.getElementById("patientId").value.trim();
+  const patientPassword = document.getElementById("patientPassword").value.trim();
+
+  if (!patientId || !patientPassword) {
+    alert("Please enter your ID and password.");
+    return;
+  }
+
+  // Firebase Authentication: Login
+  auth.signInWithEmailAndPassword(patientId + "@example.com", patientPassword)
+    .then((userCredential) => {
+      const user = userCredential.user;
+      console.log("User logged in:", user.uid);
+
+      // Try to fetch user data from Firestore
+      return db.collection("users").doc(user.uid).get();
+    })
+    .then((doc) => {
+      let userData;
+
+      if (doc.exists) {
+        userData = doc.data();
+        console.log("User data found:", userData);
+      } else {
+        console.log("No user data found in Firestore, proceeding anyway.");
+        userData = { id: patientId, name: "Unknown", dob: "", sex: "" }; // Default values
+      }
+
+      // Store user data in localStorage
+      localStorage.setItem("currentPatient", JSON.stringify(userData));
+
+      // Redirect user to fourth page regardless of Firestore data existence
+      window.location.href = `fourth-page.html?userId=${userData.id}`;
+    })
+    .catch(error => {
+      console.error("Login Error:", error.message);
+      alert(error.message);
+    });
+  
+
+}
+
+
+    
+            // Attach event listeners after the DOM loads
+            document.addEventListener("DOMContentLoaded", function () {
+                document.getElementById("signupBtn")?.addEventListener("click", signupUser);
+                document.getElementById("loginBtn")?.addEventListener("click", loginUser);
+            });
+    
+            // Check Firebase connection
+            firebase.firestore().collection("test").get()
+                .then(() => console.log("🔥 Firebase is connected!"))
+                .catch(error => console.error("❌ Firebase connection error:", error));
+        </script>
+    </body>
+    </html>
+    
